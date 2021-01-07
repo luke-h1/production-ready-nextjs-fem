@@ -79,7 +79,6 @@ export async function getStaticProps({ params, preview }) {
     const cmsPosts = (preview ? posts.draft : posts.published).map((p) => {
       return matter(p)
     })
-
     const match = cmsPosts.find((p) => p.data.slug === params.slug)
     post = match.content
   }
