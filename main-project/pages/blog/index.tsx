@@ -47,7 +47,7 @@ export function getStaticProps() {
   })
   const posts = [...cmsPosts, ...filePosts]
   return {
-    props: {posts},
+    props: { posts },
   }
 }
 

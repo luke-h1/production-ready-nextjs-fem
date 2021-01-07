@@ -3,6 +3,9 @@ import hydrate from 'next-mdx-remote/hydrate'
 import { majorScale, Pane, Heading, Spinner } from 'evergreen-ui'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
+import fs from 'fs'
+import path from 'path'
+import matter from 'gray-matter'
 import { Post } from '../../types'
 import Container from '../../components/container'
 import HomeNav from '../../components/homeNav'
@@ -42,6 +45,20 @@ const BlogPost: FC<Post> = ({ source, frontMatter }) => {
 BlogPost.defaultProps = {
   source: '',
   frontMatter: { title: 'default title', summary: 'summary', publishedOn: '' },
+}
+
+export function getStaticPaths() {
+  const postsPath = path.join(process.cwd(), 'posts')
+  const filenames = fs.readdirSync(postsPath)
+  const slugs = filenames.map((name) => {
+    const filePath = path.join(postsPath, name)
+    const file = fs.readFileSync(filePath, 'utf-8')
+    const { data } = matter(file)
+    return data
+  })
+  return {
+    path: slugs.map((s) => ({ params: { slug: s.slug } })),
+  }
 }
 
 /**
