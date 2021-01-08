@@ -1,7 +1,7 @@
-import { NextAuth } from 'next-auth'
+import NextAuth from 'next-auth'
 import Providers from 'next-auth/providers'
 
-export default (req, res) =>
+export default (req, res) => {
   NextAuth(req, res, {
     session: {
       jwt: true,
@@ -10,7 +10,7 @@ export default (req, res) =>
       secret: process.env.JWT_SECRET,
     },
     providers: [
-      Providers.Github({
+      Providers.GitHub({
         clientId: process.env.GITHUB_ID,
         clientSecret: process.env.GITHUB_SECRET,
       }),
@@ -20,3 +20,4 @@ export default (req, res) =>
       signIn: '/signin',
     },
   })
+}
