@@ -2,7 +2,6 @@ import React, { FC, useState } from 'react'
 import { Pane, Dialog, majorScale } from 'evergreen-ui'
 import { useRouter } from 'next/router'
 import { getSession, useSession } from 'next-auth/client'
-import { connect } from 'mongodb'
 import Logo from '../../components/logo'
 import FolderList from '../../components/folderList'
 import NewFolderButton from '../../components/newFolderButton'
@@ -60,6 +59,7 @@ const App: FC<{ folders?: any[]; activeFolder?: any; activeDoc?: any; activeDocs
       <Pane width={300} position="absolute" top={0} left={0} background="tint2" height="100vh" borderRight>
         <Pane padding={majorScale(2)} display="flex" alignItems="center" justifyContent="space-between">
           <Logo />
+
           <NewFolderButton onClick={() => setIsShown(true)} />
         </Pane>
         <Pane>
@@ -79,25 +79,31 @@ App.defaultProps = {
   folders: [],
 }
 
-export async function getServerSideProps(ctx) {
-  const session = await getSession(ctx)
-  if (!session) {
-    return {
-      props: { session },
-    }
+export async function getServerSideProps(context) {
+  const session = await getSession(context)
+  // not signed in
+  if (!session || !session.user) {
+    return { props: {} }
   }
-  const props: any = {}
 
+  const props: any = { session }
   const { db } = await connectToDB()
   const folders = await folder.getFolders(db, session.user.id)
+  props.folders = folders
 
-  if (ctx.params.id) {
-    props.activeFolder = await folders.find((f) => f._id === ctx.params.id[0])
-    props.activeDocs = await doc.getDocsByFolder(db, props.activeFolder._id)
-    if (ctx.params.id.length > 1) {
-      props.activeDoc = props.activeDocs.find((d) => d._id === ctx.params.id[2])
+  if (context.params.id) {
+    const activeFolder = folders.find((f) => f._id === context.params.id[0])
+    const activeDocs = await doc.getDocsByFolder(db, activeFolder._id)
+    props.activeFolder = activeFolder
+    props.activeDocs = activeDocs
+
+    const activeDocId = context.params.id[1]
+
+    if (activeDocId) {
+      props.activeDoc = await doc.getOneDoc(db, activeDocId)
     }
   }
+
   return {
     props,
   }
@@ -106,9 +112,9 @@ export async function getServerSideProps(ctx) {
 /**
  * Catch all handler. Must handle all different page
  * states.
- * 1. Folders - none selected
- * 2. Folders => Folder selected
- * 3. Folders => Folder selected => Document selected
+ * 1. Folders - none selected /app
+ * 2. Folders => Folder selected /app/1
+ * 3. Folders => Folder selected => Document selected /app/1/2
  *
  * An unauth user should not be able to access this page.
  *

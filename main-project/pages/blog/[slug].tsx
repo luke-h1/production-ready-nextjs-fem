@@ -79,6 +79,7 @@ export async function getStaticProps({ params, preview }) {
     const cmsPosts = (preview ? posts.draft : posts.published).map((p) => {
       return matter(p)
     })
+
     const match = cmsPosts.find((p) => p.data.slug === params.slug)
     post = match.content
   }
@@ -94,9 +95,4 @@ export async function getStaticProps({ params, preview }) {
   }
 }
 
-/**
- * Need to get the paths here
- * then the the correct post for the matching path
- * Posts can come from the fs or our CMS
- */
 export default BlogPost

@@ -6,7 +6,7 @@ import Logo from '../components/logo'
 import SocialButton from '../components/socialButton'
 
 const Signin = () => {
-  const [session] = useSession()
+  const [session, loading] = useSession()
   const router = useRouter()
 
   useEffect(() => {

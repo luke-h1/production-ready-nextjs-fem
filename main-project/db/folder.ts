@@ -10,6 +10,7 @@ export const createFolder = async (db: Db, folder: { createdBy: string; name: st
       createdAt: new Date().toDateString(),
     })
     .then(({ ops }) => ops[0])
+
   return newFolder
 }
 
