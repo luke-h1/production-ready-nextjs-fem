@@ -1,6 +1,7 @@
 import React, { FC, useState } from 'react'
 import { Pane, Dialog, majorScale } from 'evergreen-ui'
 import { useRouter } from 'next/router'
+import { getSession, useSession } from 'next-auth/client'
 import Logo from '../../components/logo'
 import FolderList from '../../components/folderList'
 import NewFolderButton from '../../components/newFolderButton'
@@ -16,7 +17,12 @@ const App: FC<{ folders?: any[]; activeFolder?: any; activeDoc?: any; activeDocs
   activeDocs,
 }) => {
   const router = useRouter()
+  const [session, loading] = useSession()
   const [newFolderIsShown, setIsShown] = useState(false)
+
+  if (loading) {
+    return null
+  }
 
   const Page = () => {
     if (activeDoc) {
@@ -30,7 +36,7 @@ const App: FC<{ folders?: any[]; activeFolder?: any; activeDoc?: any; activeDocs
     return null
   }
 
-  if (false) {
+  if (!loading && !session) {
     return (
       <Dialog
         isShown
@@ -52,7 +58,6 @@ const App: FC<{ folders?: any[]; activeFolder?: any; activeDoc?: any; activeDocs
       <Pane width={300} position="absolute" top={0} left={0} background="tint2" height="100vh" borderRight>
         <Pane padding={majorScale(2)} display="flex" alignItems="center" justifyContent="space-between">
           <Logo />
-
           <NewFolderButton onClick={() => setIsShown(true)} />
         </Pane>
         <Pane>
@@ -60,7 +65,7 @@ const App: FC<{ folders?: any[]; activeFolder?: any; activeDoc?: any; activeDocs
         </Pane>
       </Pane>
       <Pane marginLeft={300} width="calc(100vw - 300px)" height="100vh" overflowY="auto" position="relative">
-        <User user={{}} />
+        <User user={session.user} />
         <Page />
       </Pane>
       <NewFolderDialog close={() => setIsShown(false)} isShown={newFolderIsShown} onNewFolder={() => {}} />
@@ -70,6 +75,13 @@ const App: FC<{ folders?: any[]; activeFolder?: any; activeDoc?: any; activeDocs
 
 App.defaultProps = {
   folders: [],
+}
+
+export async function getServerSideProps(ctx) {
+  const session = await getSession(ctx)
+  return {
+    props: { session },
+  }
 }
 
 /**

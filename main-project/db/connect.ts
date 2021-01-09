@@ -13,7 +13,13 @@ import { Db, MongoClient } from 'mongodb'
 global.mongo = global.mongo || {}
 
 export const connectToDB = async () => {
-  const db = {}
+  if (!global.mongo) {
+    const client = new MongoClient(process.env.DATABASE_URL, {
+      useUnifiedTopology: true,
+      useNewUrlParser: true,
+      bufferMaxEntries: 0,
+    })
+  }
 
   return { db, dbClient: global.mongo.client }
 }
